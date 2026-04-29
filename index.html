@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-status-bar-style" content="black-translucent">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renascer — Sua Jornada</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e28;
+    --border: #252a38;
+    --accent: #c8a96e;
+    --accent2: #7eb8a4;
+    --danger: #c96e6e;
+    --text: #e8e0d0;
+    --text2: #8a8a99;
+    --text3: #4a4a5a;
+    --glow: rgba(200, 169, 110, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  .app {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* Header */
+  .header {
+    padding: 40px 0 32px;
+    text-align: center;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin-top: 32px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .tagline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Phase banner */
+  .phase-banner {
+    margin: 28px 0;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phase-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, var(--glow), transparent);
+    pointer-events: none;
+  }
+
+  .phase-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .phase-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .phase-desc {
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* Day counter */
+  .counter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .counter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 12px;
+    text-align: center;
+  }
+
+  .counter-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .counter-lbl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin: 20px 0;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .progress-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+  }
+
+  .progress-track {
+    height: 4px;
+    background: var(--surface2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* Phase timeline */
+  .timeline {
+    margin: 28px 0;
+    display: flex;
+    gap: 0;
+  }
+
+  .timeline-phase {
+    flex: 1;
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-right: none;
+    cursor: default;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .timeline-phase:last-child { border-right: 1px solid var(--border); }
+
+  .timeline-phase.active {
+    background: var(--surface);
+    border-color: var(--accent);
+    z-index: 1;
+  }
+
+  .timeline-phase.done {
+    background: rgba(126, 184, 164, 0.05);
+    border-color: var(--accent2);
+  }
+
+  .timeline-phase.future { opacity: 0.4; }
+
+  .tl-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .tl-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  /* Daily check */
+  .daily-section {
+    margin: 28px 0;
+  }
+
+  .section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .check-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+  }
+
+  .check-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  .check-question {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .check-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: 1px solid;
+    background: transparent;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-success {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  .btn-success:hover, .btn-success.active {
+    background: var(--accent2);
+    color: var(--bg);
+  }
+
+  .btn-fail {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .btn-fail:hover, .btn-fail.active {
+    background: var(--danger);
+    color: var(--bg);
+  }
+
+  .btn-primary {
+    border-color: var(--accent);
+    color: var(--accent);
+    flex: 1;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-ghost {
+    border-color: var(--border);
+    color: var(--text2);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--text2);
+    color: var(--text);
+  }
+
+  .btn-danger {
+    border-color: var(--danger);
+    color: var(--danger);
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+  }
+
+  .btn-danger:hover {
+    background: var(--danger);
+    color: var(--bg);
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 14px;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text3); }
+
+  /* Journal */
+  .journal-entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .journal-entry.success { border-left: 3px solid var(--accent2); }
+  .journal-entry.fail { border-left: 3px solid var(--danger); }
+
+  .journal-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .journal-day {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+  }
+
+  .journal-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .journal-status.success { color: var(--accent2); border-color: var(--accent2); }
+  .journal-status.fail { color: var(--danger); border-color: var(--danger); }
+
+  .journal-text {
+    font-size: 0.83rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .modal-body {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .modal-body strong { color: var(--text); }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Alert */
+  .alert {
+    padding: 14px 16px;
+    border: 1px solid;
+    margin-bottom: 16px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .alert-warning {
+    border-color: var(--accent);
+    background: rgba(200, 169, 110, 0.06);
+    color: var(--accent);
+  }
+
+  .alert-info {
+    border-color: var(--accent2);
+    background: rgba(126, 184, 164, 0.06);
+    color: var(--accent2);
+  }
+
+  .alert-danger {
+    border-color: var(--danger);
+    background: rgba(201, 110, 110, 0.06);
+    color: var(--danger);
+  }
+
+  /* Streak dots */
+  .streak-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    margin: 16px 0;
+  }
+
+  .streak-dot {
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  .streak-dot.success { background: var(--accent2); border-color: var(--accent2); }
+  .streak-dot.fail { background: var(--danger); border-color: var(--danger); }
+  .streak-dot.today { border-color: var(--accent); animation: pulse 2s infinite; }
+  .streak-dot.future { opacity: 0.2; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,169,110,0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(200,169,110,0); }
+  }
+
+  /* Special day-0 badge */
+  .day0-badge {
+    text-align: center;
+    padding: 32px 20px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    position: relative;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .day0-badge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(200,169,110,0.08) 0%, transparent 70%);
+  }
+
+  .day0-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.6rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .day0-desc {
+    font-size: 0.85rem;
+    color: var(--text2);
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* Already checked */
+  .checked-today {
+    text-align: center;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+  }
+
+  .checked-icon {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+
+  .checked-msg {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--text2);
+  }
+
+  .hidden { display: none !important; }
+
+  /* Fade in */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .app > * { animation: fadeIn 0.4s ease both; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .counter-num { font-size: 1.8rem; }
+    .logo { font-size: 1.6rem; }
+    .tl-num { font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">Renascer</div>
+    <div class="tagline">Sua jornada de 61 dias</div>
+  </div>
+
+  <!-- Day 0 Welcome (shown only on first access) -->
+  <div id="day0Screen" class="hidden">
+    <div class="day0-badge">
+      <div class="day0-title">Dia da Despedida</div>
+      <div class="day0-desc">
+        Este é o seu ponto de partida. Hoje é o último dia antes da jornada começar de verdade.<br><br>
+        Amanhã, a caminhada começa. Você escolheu isso.
+      </div>
+    </div>
+    <div style="margin-top: 16px;">
+      <button class="btn btn-primary" onclick="startJourney()" style="width:100%; padding:14px;">
+        Começar minha jornada amanhã →
+      </button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div id="mainContent" class="hidden">
+
+    <!-- Phase banner -->
+    <div class="phase-banner">
+      <div class="phase-label" id="phaseLbl">Fase</div>
+      <div class="phase-name" id="phaseName">—</div>
+      <div class="phase-desc" id="phaseDesc">—</div>
+    </div>
+
+    <!-- Counters -->
+    <div class="counter-row">
+      <div class="counter-card">
+        <div class="counter-num" id="dayNum">0</div>
+        <div class="counter-lbl">Dia atual</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-num" id="streakNum">0</div>
+        <div class="counter-lbl">Sequência</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-num" id="daysLeft">61</div>
+        <div class="counter-lbl">Restantes</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <span class="progress-title">Progresso total</span>
+        <span class="progress-pct" id="progressPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline">
+      <div class="timeline-phase future" id="tl0">
+        <div class="tl-num">D0</div>
+        <div class="tl-label">Despedida</div>
+      </div>
+      <div class="timeline-phase future" id="tl1">
+        <div class="tl-num">15d</div>
+        <div class="tl-label">Transição</div>
+      </div>
+      <div class="timeline-phase future" id="tl2">
+        <div class="tl-num">15d</div>
+        <div class="tl-label">Sem visual</div>
+      </div>
+      <div class="timeline-phase future" id="tl3">
+        <div class="tl-num">30d</div>
+        <div class="tl-label">Moderação</div>
+      </div>
+      <div class="timeline-phase future" id="tl4">
+        <div class="tl-num">30d</div>
+        <div class="tl-label">Alternado</div>
+      </div>
+    </div>
+
+    <!-- Streak dots -->
+    <div class="section-title">Histórico de dias</div>
+    <div class="streak-grid" id="streakGrid"></div>
+
+    <!-- Daily check -->
+    <div class="section-title">Check-in de hoje</div>
+
+    <!-- Already checked -->
+    <div id="alreadyChecked" class="hidden checked-today">
+      <div class="checked-icon">✓</div>
+      <div class="checked-msg">Você já registrou o dia de hoje.</div>
+      <div style="margin-top: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--text3);">Volte amanhã.</div>
+    </div>
+
+    <!-- Check form -->
+    <div id="checkForm" class="check-card">
+      <div class="check-date" id="checkDate">—</div>
+      <div class="check-question" id="checkQuestion">Você cumpriu as regras da fase hoje?</div>
+
+      <div id="alertBox" class="hidden"></div>
+
+      <div class="check-buttons">
+        <button class="btn btn-success" id="btnYes" onclick="selectStatus('success')">✓ Sim, mantive</button>
+        <button class="btn btn-fail" id="btnNo" onclick="selectStatus('fail')">✗ Falhei hoje</button>
+      </div>
+
+      <textarea id="journalInput" placeholder="Escreva seu relato do dia... (obrigatório)" rows="4"></textarea>
+
+      <div style="display: flex; gap: 10px; margin-top: 12px;">
+        <button class="btn btn-primary" onclick="saveDay()">Salvar dia →</button>
+      </div>
+    </div>
+
+    <!-- Reset -->
+    <div style="margin-top: 12px;">
+      <button class="btn btn-danger" onclick="confirmReset()">⚠ Reiniciar toda a jornada</button>
+    </div>
+
+    <!-- Journal -->
+    <div class="section-title" style="margin-top: 32px;">Diário</div>
+    <div id="journalList"></div>
+    <div id="emptyJournal" style="font-size: 0.82rem; color: var(--text3); text-align: center; padding: 20px;">
+      Nenhum registro ainda.
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Reset confirm modal -->
+<div id="resetModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Reiniciar a jornada?</div>
+    <div class="modal-body">
+      Todo o seu progresso, diário e histórico serão apagados.<br><br>
+      <strong>Esta ação não pode ser desfeita.</strong><br><br>
+      Você tem certeza? Lembre-se: recomeçar faz parte, mas cada reinício é uma oportunidade de ir mais longe desta vez.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-fail" onclick="doReset()">Sim, reiniciar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fail modal -->
+<div id="failModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Você falhou hoje.</div>
+    <div class="modal-body" id="failModalBody">
+      Não é o fim. Cada queda é parte da jornada.<br><br>
+      Mas o protocolo exige que você <strong>recue uma fase</strong> para continuar com honestidade.<br><br>
+      Você tem coragem para continuar do ponto correto?
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="acceptPenalty()">Aceito a consequência</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+
+const PHASES = [
+  {
+    id: 0,
+    label: 'Fase 0',
+    name: 'Dia da Despedida',
+    desc: 'O último dia antes da jornada. Uma despedida consciente.',
+    duration: 1,
+    question: 'Você está pronto para começar amanhã?',
+    alert: null
+  },
+  {
+    id: 1,
+    label: 'Fase 1 — Dias 1 a 15',
+    name: 'Transição Suave',
+    desc: 'Conteúdo sugestivo ainda é permitido, mas pornografia está proibida.',
+    duration: 15,
+    question: 'Você evitou pornografia hoje?',
+    alert: { type: 'alert-warning', msg: 'Atenção: conteúdo visual sugestivo ainda é tolerado nesta fase, mas pornografia já é proibida.' }
+  },
+  {
+    id: 2,
+    label: 'Fase 2 — Dias 16 a 30',
+    name: 'Corte Visual Total',
+    desc: 'Todo estímulo visual sensual está cortado. Nada de conteúdo sugestivo.',
+    duration: 15,
+    question: 'Você eliminou todos os estímulos visuais hoje?',
+    alert: { type: 'alert-info', msg: 'Nesta fase: zero conteúdo visual de qualquer natureza sensual.' }
+  },
+  {
+    id: 3,
+    label: 'Fase 3 — Dias 31 a 60',
+    name: 'Moderação Consciente',
+    desc: 'Masturbação é permitida no máximo 1 vez por dia. Sem exceções.',
+    duration: 30,
+    question: 'Você respeitou o limite de 1 vez hoje?',
+    alert: { type: 'alert-info', msg: 'Regra: máximo 1 vez ao dia. Se fizer 2 vezes, registre como falha.' }
+  },
+  {
+    id: 4,
+    label: 'Fase 4 — Dias 61 a 90',
+    name: 'Alternância',
+    desc: 'Dia sim, dia não. Construindo controle e disciplina real.',
+    duration: 30,
+    question: 'Você respeitou a alternância hoje?',
+    alert: { type: 'alert-info', msg: 'Lembre-se: hoje é um dia SIM ou NÃO? Veja o número do dia.' }
+  }
+];
+
+const TOTAL_DAYS = 61; // 15 + 15 + 30 (phases 1-3, phase 4 is bonus)
+
+function getState() {
+  const raw = localStorage.getItem('renascer_v1');
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function saveState(s) {
+  localStorage.setItem('renascer_v1', JSON.stringify(s));
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function fmtDate(str) {
+  const [y,m,d] = str.split('-');
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${parseInt(d)} de ${months[parseInt(m)-1]} de ${y}`;
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+
+function init() {
+  const state = getState();
+  if (!state) {
+    // First time
+    document.getElementById('day0Screen').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('mainContent').classList.remove('hidden');
+  render(state);
+}
+
+function startJourney() {
+  const state = {
+    startDate: todayStr(), // day 0 is today
+    phase: 1,              // actual phase starts at 1 from tomorrow
+    entries: [],           // { date, status, note, phase }
+    phaseStartDay: 1,
+    penaltyPending: false
+  };
+  // Record day 0
+  saveState(state);
+  document.getElementById('day0Screen').classList.add('hidden');
+  document.getElementById('mainContent').classList.remove('hidden');
+  render(state);
+}
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+
+function render(state) {
+  const today = todayStr();
+  const dayNum = daysSince(state.startDate); // 0 = start date
+  const phase = getCurrentPhase(dayNum);
+  const phaseData = PHASES[phase];
+
+  // Counters
+  document.getElementById('dayNum').textContent = dayNum;
+  document.getElementById('daysLeft').textContent = Math.max(0, TOTAL_DAYS - dayNum);
+
+  // Streak
+  const streak = calcStreak(state.entries);
+  document.getElementById('streakNum').textContent = streak;
+
+  // Progress (based on 61 days total)
+  const pct = Math.min(100, Math.round((dayNum / TOTAL_DAYS) * 100));
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // Phase banner
+  document.getElementById('phaseLbl').textContent = phaseData.label;
+  document.getElementById('phaseName').textContent = phaseData.name;
+  document.getElementById('phaseDesc').textContent = phaseData.desc;
+
+  // Timeline
+  const tlMap = {0:'tl0', 1:'tl1', 2:'tl2', 3:'tl3', 4:'tl4'};
+  for (let i=0; i<=4; i++) {
+    const el = document.getElementById(tlMap[i]);
+    el.className = 'timeline-phase';
+    if (i < phase) el.classList.add('done');
+    else if (i === phase) el.classList.add('active');
+    else el.classList.add('future');
+  }
+
+  // Streak grid
+  renderStreakGrid(state.entries, dayNum);
+
+  // Daily check
+  const todayEntry = state.entries.find(e => e.date === today);
+  const checkForm = document.getElementById('checkForm');
+  const alreadyChecked = document.getElementById('alreadyChecked');
+
+  if (todayEntry) {
+    checkForm.classList.add('hidden');
+    alreadyChecked.classList.remove('hidden');
+  } else if (dayNum === 0) {
+    checkForm.classList.add('hidden');
+    alreadyChecked.classList.remove('hidden');
+    document.querySelector('.checked-msg').textContent = 'Dia da despedida — volte amanhã para começar.';
+    document.querySelector('.checked-msg').nextElementSibling.textContent = '';
+  } else {
+    checkForm.classList.remove('hidden');
+    alreadyChecked.classList.add('hidden');
+
+    document.getElementById('checkDate').textContent = fmtDate(today) + ' — ' + phaseData.label;
+    document.getElementById('checkQuestion').textContent = phaseData.question;
+
+    // Phase-specific alert
+    const alertBox = document.getElementById('alertBox');
+    if (phaseData.alert) {
+      alertBox.className = 'alert ' + phaseData.alert.type;
+      alertBox.textContent = phaseData.alert.msg;
+      alertBox.classList.remove('hidden');
+
+      // Alternating day hint for phase 4
+      if (phase === 4) {
+        const isYesDay = dayNum % 2 === 1;
+        alertBox.textContent = `Hoje é um dia ${isYesDay ? 'SIM ✓' : 'NÃO ✗'}. ${isYesDay ? 'Permitido (1x).' : 'Proibido hoje.'}`;
+      }
+    } else {
+      alertBox.classList.add('hidden');
+    }
+  }
+
+  // Journal
+  renderJournal(state.entries);
+}
+
+function renderStreakGrid(entries, dayNum) {
+  const grid = document.getElementById('streakGrid');
+  const total = Math.max(dayNum + 1, 10);
+  const cells = Math.min(total, 60);
+  grid.innerHTML = '';
+  for (let i = 1; i <= cells; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot';
+    // Find entry for day i
+    const today = todayStr();
+    // We need to map day number to date
+    // Day 1 is startDate+1 day, etc.
+    if (i > dayNum) {
+      dot.classList.add('future');
+    } else if (i === dayNum) {
+      dot.classList.add('today');
+    } else {
+      // find entry
+      const entryDate = addDays(entries[0]?.date ? getStartDate() : today, i);
+      const entry = entries.find(e => dayOfEntry(e.date) === i);
+      if (entry) {
+        dot.classList.add(entry.status);
+      }
+    }
+    grid.appendChild(dot);
+  }
+}
+
+function getStartDate() {
+  const state = getState();
+  return state ? state.startDate : todayStr();
+}
+
+function dayOfEntry(dateStr) {
+  const state = getState();
+  if (!state) return 0;
+  return daysSince(state.startDate, dateStr);
+}
+
+function renderJournal(entries) {
+  const list = document.getElementById('journalList');
+  const empty = document.getElementById('emptyJournal');
+  if (!entries.length) {
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  const sorted = [...entries].reverse();
+  list.innerHTML = sorted.map(e => `
+    <div class="journal-entry ${e.status}">
+      <div class="journal-meta">
+        <span class="journal-day">${fmtDate(e.date)} — Fase ${e.phase}</span>
+        <span class="journal-status ${e.status}">${e.status === 'success' ? '✓ Mantive' : '✗ Falhei'}</span>
+      </div>
+      <div class="journal-text">${escHtml(e.note)}</div>
+    </div>
+  `).join('');
+}
+
+// ─── Actions ─────────────────────────────────────────────────────────────────
+
+let selectedStatus = null;
+
+function selectStatus(s) {
+  selectedStatus = s;
+  document.getElementById('btnYes').classList.toggle('active', s === 'success');
+  document.getElementById('btnNo').classList.toggle('active', s === 'fail');
+}
+
+function saveDay() {
+  if (!selectedStatus) {
+    alert('Selecione se você manteve ou falhou hoje.');
+    return;
+  }
+  const note = document.getElementById('journalInput').value.trim();
+  if (!note) {
+    alert('Escreva seu relato do dia antes de salvar.');
+    return;
+  }
+
+  const state = getState();
+  const today = todayStr();
+  const dayNum = daysSince(state.startDate);
+  const phase = getCurrentPhase(dayNum);
+
+  state.entries.push({
+    date: today,
+    status: selectedStatus,
+    note,
+    phase
+  });
+
+  if (selectedStatus === 'fail') {
+    // Show fail modal
+    saveState(state);
+    showFailModal(phase);
+  } else {
+    saveState(state);
+    selectedStatus = null;
+    document.getElementById('journalInput').value = '';
+    document.getElementById('btnYes').classList.remove('active');
+    document.getElementById('btnNo').classList.remove('active');
+    render(state);
+  }
+}
+
+function showFailModal(phase) {
+  const prevPhase = Math.max(1, phase - 1);
+  const body = phase <= 1
+    ? `Não é o fim. Você voltará ao início da Fase 1 para recomeçar com honestidade.<br><br><strong>Seu diário é mantido</strong> — sua história importa.`
+    : `Ao falhar, você recua para a <strong>Fase ${prevPhase} — ${PHASES[prevPhase].name}</strong>.<br><br>Seu diário é mantido. A memória das batalhas pertence a você.`;
+  document.getElementById('failModalBody').innerHTML = body;
+  document.getElementById('failModal').classList.remove('hidden');
+}
+
+function acceptPenalty() {
+  const state = getState();
+  const entries = state.entries;
+  const lastFail = [...entries].reverse().find(e => e.status === 'fail');
+  if (lastFail) {
+    const failDay = dayOfEntry(lastFail.date);
+    const failPhase = lastFail.phase;
+    // Recede to previous phase
+    const newPhase = Math.max(1, failPhase - 1);
+    // Reset start date to make current day = first day of that phase
+    // We adjust startDate so dayNum recalculates correctly
+    // Phases: 1=days1-15, 2=days16-30, 3=days31-60, 4=days61-90
+    const phaseStartDays = [0, 1, 16, 31, 61];
+    const targetDay = phaseStartDays[newPhase];
+    // new startDate = today - targetDay days
+    const newStart = addDays(todayStr(), -targetDay);
+    state.startDate = newStart;
+  }
+  closeModal();
+  document.getElementById('failModal').classList.add('hidden');
+  saveState(state);
+  selectedStatus = null;
+  document.getElementById('journalInput').value = '';
+  document.getElementById('btnYes').classList.remove('active');
+  document.getElementById('btnNo').classList.remove('active');
+  render(state);
+}
+
+function confirmReset() {
+  document.getElementById('resetModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('resetModal').classList.add('hidden');
+}
+
+function doReset() {
+  localStorage.removeItem('renascer_v1');
+  location.reload();
+}
+
+// ─── Utils ───────────────────────────────────────────────────────────────────
+
+function daysSince(startStr, endStr) {
+  const start = new Date(startStr + 'T00:00:00');
+  const end = endStr ? new Date(endStr + 'T00:00:00') : new Date(new Date().toDateString());
+  const diff = Math.floor((end - start) / 86400000);
+  return Math.max(0, diff);
+}
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getCurrentPhase(dayNum) {
+  if (dayNum === 0) return 0;
+  if (dayNum <= 15) return 1;
+  if (dayNum <= 30) return 2;
+  if (dayNum <= 60) return 3;
+  return 4;
+}
+
+function calcStreak(entries) {
+  if (!entries.length) return 0;
+  const sorted = [...entries].sort((a,b) => b.date.localeCompare(a.date));
+  let streak = 0;
+  for (const e of sorted) {
+    if (e.status === 'success') streak++;
+    else break;
+  }
+  return streak;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ─── Start ───────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

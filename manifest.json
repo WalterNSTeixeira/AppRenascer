@@ -1,0 +1,15 @@
+{
+  "name": "Renascer - Jornada Pessoal",
+  "short_name": "Renascer",
+  "start_url": "No fap.html",
+  "display": "standalone",
+  "background_color": "#0d0f14",
+  "theme_color": "#c8a96e",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
