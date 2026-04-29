@@ -1,15 +1,17 @@
 {
-  "name": "Renascer - Jornada Pessoal",
+  "name": "Renascer",
   "short_name": "Renascer",
-  "start_url": "No fap.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0d0f14",
   "theme_color": "#c8a96e",
+  "description": "Sua jornada de 61 dias",
   "icons": [
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
